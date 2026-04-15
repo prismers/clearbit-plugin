@@ -1,11 +1,11 @@
 # ClearBit Plugin Marketplace
 
-Official Claude Code plugin marketplace for the [ClearBit](https://github.com/HexRaysSA/clearbit) binary analysis service.
+Official Claude Code plugin marketplace for the ClearBit binary analysis service.
 
 ## Add this marketplace
 
 ```
-/plugin marketplace add <owner>/clearbit-plugin
+/plugin marketplace add prismers/clearbit-plugin
 ```
 
 ## Available plugins
