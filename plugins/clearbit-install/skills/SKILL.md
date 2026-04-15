@@ -85,6 +85,10 @@ curl -X POST <base_url>/binaries \
 
 - poll `check_binary_status(binary_id)` until ready
 
-5. Report the result.
+5. Restart the client.
+
+Remind to restart Claude Code (or whichever client was configured) so the new MCP server is loaded. Configuration changes are not picked up by a running session.
+
+6. Report the result.
 
 State whether installation succeeded, where config changed, which headers were configured, and whether verification passed.
