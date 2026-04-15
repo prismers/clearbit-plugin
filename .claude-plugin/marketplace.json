@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "clearbit-plugins",
+  "version": "1.0.0",
+  "description": "Official plugin marketplace for the ClearBit binary analysis service",
+  "owner": {
+    "name": "ClearBit"
+  },
+  "plugins": [
+    {
+      "name": "clearbit-install",
+      "description": "Install and verify the ClearBit MCP service in a coding agent client",
+      "source": "./plugins/clearbit-install",
+      "category": "development"
+    }
+  ]
+}
