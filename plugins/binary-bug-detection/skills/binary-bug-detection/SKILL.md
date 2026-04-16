@@ -15,7 +15,7 @@ description: >-
 
 Use this skill to find taint-style vulnerabilities in an ELF binary that has already been loaded into ClearBit.
 
-If ClearBit MCP is not yet configured, stop and run the `clearbit-install` skill first before proceeding. Do not use this skill for server deployment or MCP client setup.
+Do not use this skill for server deployment or MCP client setup.
 
 ## Inputs
 
