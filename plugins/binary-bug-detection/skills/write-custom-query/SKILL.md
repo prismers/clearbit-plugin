@@ -1,6 +1,12 @@
 ---
 name: write-custom-query
-description: write and run custom ClearBit queries against LLVM IR during any analysis stage. Use when you want to inspect or analyze the binary in a way not covered by existing skills, e.g. custom taint rules, specific IR patterns, or ad-hoc queries during bug analysis.
+description: >-
+  Write and run custom ClearBit queries against LLVM IR to answer specific questions about a
+  binary's structure or data flow. Use whenever you need to go beyond standard taint analysis.
+  Trigger on: "find all calls to X in function Y", "does this pointer alias", "trace how this
+  value flows through IR", "check what reads or writes this memory", "write a custom query
+  for...", or whenever binary-bug-detection needs to locate a specific IR pattern mid-analysis.
+  Also call this proactively as a helper during any analysis stage.
 ---
 
 # Write Custom Query

@@ -1,6 +1,12 @@
 ---
 name: clearbit-install
-description: Install and verify the ClearBit MCP service in a coding agent client. Use when the user wants the agent to add the ClearBit MCP server, configure auth headers, and confirm it works.
+description: >-
+  Install and verify the ClearBit MCP service in a coding agent client. Use whenever the user
+  wants to set up or connect to ClearBit, even if they don't say "MCP" or "install". Trigger
+  on: "set up ClearBit", "install ClearBit", "I have a ClearBit server running at...",
+  "connect to ClearBit at <url>", "configure ClearBit MCP", "I want to start analyzing
+  binaries with ClearBit". Also use this when binary-bug-detection fails or reports that
+  ClearBit is not configured.
 ---
 
 # ClearBit Client Setup
@@ -93,9 +99,15 @@ Remind to restart Claude Code (or whichever client was configured) so the new MC
 
 State whether installation succeeded, where config changed, which headers were configured, and whether verification passed.
 
-# Companion Skills
+## Troubleshooting
 
-The ClearBit do not expose assembly code or source/pseudo code query directly, but only return a index of IR nodes. We recommend the following external plugins to parse the IR indexing and pivot it back to source code or assembly for a comprehensive understanding of the binary:
+- **Cannot connect to server** — verify the base URL and port are correct; if the server is behind a firewall, set up an SSH tunnel (`ssh -L 3664:localhost:3664 <server-host>`) and use `http://localhost:3664`
+- **MCP tools not appearing after restart** — confirm the config was written to the correct client config file and that the client was fully restarted
+- **Upload returns 401** — check that `X-API-Key` in the upload request matches the value in the MCP config headers
+
+# Related External Plugins
+
+ClearBit returns IR node indices rather than assembly or source code directly. To map IR back to source or assembly for deeper manual review, consider:
 
 - https://github.com/HexRaysSA/ida-claude-plugins/ with the `ida-domain-scripting` skill
 

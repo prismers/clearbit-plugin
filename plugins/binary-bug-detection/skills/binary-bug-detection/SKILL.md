@@ -1,13 +1,21 @@
 ---
 name: binary-bug-detection
-description: Detect taint-style vulnerabilities in a binary using ClearBit IR analysis. Use when the user wants to find memory-safety bugs (buffer overflow, command injection, UAF) in an ELF binary via multi-agent orchestration.
+description: >-
+  Detect taint-style vulnerabilities in an ELF binary using ClearBit IR analysis — buffer
+  overflow, command injection, use-after-free, and any taint-reachable sink. Use this skill
+  whenever the user wants to find security bugs or vulnerabilities in a compiled binary, even
+  if they don't say "taint" or "ClearBit". Trigger on: "analyze this binary for bugs", "check
+  if ./httpd is vulnerable", "find CVEs in this ELF", "security audit this binary", "is there
+  a buffer overflow in this program", "pentest this binary", "scan this for vulnerabilities",
+  or just a path to an ELF with a request to check it. Orchestrates Plan, Analyze, and
+  Validate agents to produce confirmed bugs with PoC scripts.
 ---
 
 # Binary Bug Detection
 
 Use this skill to find taint-style vulnerabilities in an ELF binary that has already been loaded into ClearBit.
 
-Do not use this skill for server deployment or MCP client setup — run the `clearbit-install` skill first if ClearBit is not yet configured.
+If ClearBit MCP is not yet configured, stop and run the `clearbit-install` skill first before proceeding. Do not use this skill for server deployment or MCP client setup.
 
 ## Inputs
 
