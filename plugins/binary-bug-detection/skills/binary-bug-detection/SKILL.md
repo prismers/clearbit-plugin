@@ -23,48 +23,42 @@ Use this skill to find taint-style vulnerabilities in an ELF binary.
 - `scope` — `source-scope` (start from source, find reachable sinks) or `sink-scope` (start from sink, find reachable sources); default: `sink-scope`
 
 
-## Key Data Structures
+## File Layout
 
-- **Analysis Plan** `p = (loc, dir, targets)` — starting Binary Location as an `ir://` URI, tracking direction (`forward` or `backward`), target source/sink functions to track
-- **Bug Report** `r = (src, snk, PC, α, desc)` — taint source instruction, sink instruction, path condition, confidence α ∈ [0,1], natural-language description
-- **Binary Location** — MCP resource URI `ir://<binary_id>/<function>/<basicblock>/<instruction>`. Coarser granularity uses partial paths: `ir://<binary_id>/<function>` for function-level, `ir://<binary_id>` for binary-level.
+Agents write results to disk for persistence; the orchestrator consumes their in-conversation returns. `<binary>` is the base filename of the uploaded ELF (e.g. `httpd`).
+
+- `<binary>-plan.json` ← plan-agent: `plans[]` with `plan_id`, `loc` (ir:// URI), `dir`, `targets`
+- `<binary>-analysis/<plan-id>.json` ← analyze-agent: `reports[]` with `report_id`, `src`, `snk`, `PC`, `alpha`, `desc`
+- `<binary>-validate/<report-id>.json` ← validate-agent: `report_id`, `exploitable`, `script`, `desc`
 
 ## Workflow
 
-Orchestrate three sub-agents in depth-first order — validate each report before advancing to the next plan.
+Agents write their results to disk (for persistence and resumption) and return the same content in-conversation. The orchestrator uses the in-conversation return to maintain a full picture — plans, reports, and PoC results — without re-reading files. Files are consulted only when resuming an interrupted session.
+
+Proceed in depth-first order: fully validate all reports for one plan before moving to the next. This avoids spawning validate agents on plans that may yield nothing.
 
 ### Step 1 — Upload binary
 
 Upload input `binary` to ClearBit using the upload base URL (`http://localhost:3664`) and obtain `binary_id`.
 Poll until status is `ready` before proceeding.
 
+Derive `<binary>` = base filename without directory path (e.g. `httpd`).
+
 ### Step 2 — Generate plans
 
-Invoke `@agent-plan-agent` with `(binary_id, bug_type, scope)`.
+Invoke `@agent-plan-agent` with `(binary_id, binary, bug_type, scope)`.
 
-Returns: Analysis Plan list `[p, ...]`
+The agent returns the full plans list. If the list is empty, report that no candidates were found and stop.
 
-### Step 3 — Analyze each plan
+### Step 3 — Analyze & Validate (depth-first)
 
-For each plan `p`, invoke `@agent-analyze-agent` with `p`.
+For each plan:
+a. Invoke `@agent-analyze-agent` with `(binary, plan_id)`. It returns reports with `alpha` values.
+b. For each report where `alpha >= 0.8`, invoke `@agent-validate-agent` with `(binary, plan_id, report_id)`.
+c. Discard reports where `exploitable` is false, then proceed to the next plan.
 
-Returns: Bug Report list `[r, ...]` with confidence scores
-
-### Step 4 — Validate each report
-
-For each report `r` where `r.α ≥ 0.8`, invoke `@agent-validate-agent` with `r`.
-
-Returns: `{ exploitable, script, desc }`
-
-Discard reports where `exploitable` is false.
+**Resuming an interrupted session**: check which files already exist under `<binary>-plan.json`, `<binary>-analysis/`, and `<binary>-validate/` to determine how far the previous run got, then read those files to reconstruct context and continue.
 
 ## Output
 
-Report a table of confirmed vulnerabilities:
-
-| Binary Location | Bug Class | Source → Sink | Confidence | PoC |
-|---|---|---|---|---|
-
-## Companion Skills
-
-- `write-custom-query` — write and run custom ClearBit queries against LLVM IR during any analysis stage
+Report a table of confirmed, exploitable vulnerabilities (plan ID, bug class, source → sink, confidence, PoC trigger). Link each row to `<binary>-validate/<report-id>.json` for full detail. If none found, say so and list dismissed high-confidence reports with reasons.
