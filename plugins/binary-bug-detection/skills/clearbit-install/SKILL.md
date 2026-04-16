@@ -92,3 +92,11 @@ Remind to restart Claude Code (or whichever client was configured) so the new MC
 6. Report the result.
 
 State whether installation succeeded, where config changed, which headers were configured, and whether verification passed.
+
+# Companion Skills
+
+The ClearBit do not expose assembly code or source/pseudo code query directly, but only return a index of IR nodes. We recommend the following external plugins to parse the IR indexing and pivot it back to source code or assembly for a comprehensive understanding of the binary:
+
+- https://github.com/HexRaysSA/ida-claude-plugins/ with the `ida-domain-scripting` skill
+
+

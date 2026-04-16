@@ -11,12 +11,12 @@ Plugin marketplace for the ClearBit binary analysis service.
 ## Install the plugin
 
 ```text
-/plugin install clearbit-install@clearbit-plugins
+/plugin install binary-bug-detection@clearbit-plugins
 ```
 
 ## Available plugin
 
-- `clearbit-install`: Sets up a coding agent client to use a running ClearBit MCP server.
+- `binary-bug-detection`: Detect taint-style vulnerabilities (buffer overflow, command injection) in ELF binaries via ClearBit IR analysis. Includes client setup and multi-agent bug-finding workflow.
 
 ## What is ClearBit?
 

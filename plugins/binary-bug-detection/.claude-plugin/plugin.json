@@ -1,0 +1,7 @@
+{
+  "name": "binary-bug-detection",
+  "version": "1.0.0",
+  "description": "Detect taint-style vulnerabilities in ELF binaries using ClearBit IR analysis. Orchestrates Plan, Analyze, and Validate sub-agents to find and verify bugs such as buffer overflows and command injection.",
+  "skills": "./skills",
+  "agents": "./agents"
+}

@@ -1,6 +1,0 @@
-{
-  "name": "clearbit-install",
-  "version": "1.0.0",
-  "description": "Install and verify the ClearBit MCP service in a coding agent client. Configures auth headers and confirms the service is reachable.",
-  "skills": "./skills"
-}
