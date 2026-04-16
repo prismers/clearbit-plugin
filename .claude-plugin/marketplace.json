@@ -8,9 +8,9 @@
   },
   "plugins": [
     {
-      "name": "clearbit-install",
-      "description": "Install and verify the ClearBit MCP service in a coding agent client",
-      "source": "./plugins/clearbit-install",
+      "name": "binary-bug-detection",
+      "description": "Detect taint-style vulnerabilities in ELF binaries using ClearBit IR analysis, including setup and multi-agent bug finding",
+      "source": "./plugins/binary-bug-detection",
       "category": "development"
     }
   ]
