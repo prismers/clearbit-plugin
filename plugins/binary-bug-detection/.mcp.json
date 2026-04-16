@@ -2,10 +2,9 @@
   "mcpServers": {
     "clearbit": {
       "type": "http",
-      "url": "${CLEARBIT_BASE_URL:-http://localhost:3664}/mcp",
+      "url": "http://localhost:3664/mcp",
       "headers": {
-        "X-API-Key": "${CLEARBIT_API_KEY}",
-        "X-User-Email": "${CLEARBIT_USER_EMAIL}"
+        "X-API-Key": "${CLEARBIT_API_KEY}"
       }
     }
   }
