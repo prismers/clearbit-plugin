@@ -1,22 +1,15 @@
-json::Object runCustomQuery(Module &M, const json::Object &Args) {
-    json::Object Doc;
-    IRUri Uri;
-    std::string ErrorURI, ErrorMsg;
-    if (!resolveIRFromArgs(M, Args, Uri, ErrorURI, ErrorMsg)) {
-        Doc["found"] = false;
-        Doc["uri"] = ErrorURI;
-        Doc["error"] = ErrorMsg;
-        return Doc;
-    }
-    if (!Uri.instruction) {
-        Doc["found"] = false;
-        Doc["uri"] = IRUri::buildURI(&M);
-        Doc["error"] = "uri must resolve to an instruction";
-        return Doc;
+void getQueryAnalysisUsage(AnalysisUsage &AU) {}
+
+bool runQueryBody(const Module &M, const IRUri &Q, json::Object &Response) {
+    if (!Q.instruction) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M);
+        Response["error"] = "uri must resolve to an instruction";
+        return false;
     }
 
     json::Array Users;
-    for (const User *U : Uri.instruction->users()) {
+    for (const User *U : Q.instruction->users()) {
         const auto *UserInst = dyn_cast<Instruction>(U);
         if (!UserInst) {
             continue;
@@ -45,9 +38,9 @@ json::Object runCustomQuery(Module &M, const json::Object &Args) {
         Users.push_back(std::move(Entry));
     }
 
-    Doc["found"] = true;
-    Doc["uri"] = IRUri::buildURI(&M, Uri.function, Uri.block, Uri.instruction);
-    Doc["kind"] = "instruction";
-    Doc["users"] = std::move(Users);
-    return Doc;
+    Response["found"] = true;
+    Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+    Response["kind"] = "instruction";
+    Response["users"] = std::move(Users);
+    return true;
 }

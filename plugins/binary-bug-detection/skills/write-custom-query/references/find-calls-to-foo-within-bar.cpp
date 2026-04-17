@@ -1,22 +1,15 @@
-json::Object runCustomQuery(Module &M, const json::Object &Args) {
-    json::Object Doc;
-    IRUri Uri;
-    std::string ErrorURI, ErrorMsg;
-    if (!resolveIRFromArgs(M, Args, Uri, ErrorURI, ErrorMsg)) {
-        Doc["found"] = false;
-        Doc["uri"] = ErrorURI;
-        Doc["error"] = ErrorMsg;
-        return Doc;
-    }
-    if (!Uri.function) {
-        Doc["found"] = false;
-        Doc["uri"] = IRUri::buildURI(&M);
-        Doc["error"] = "uri must resolve to a function";
-        return Doc;
+void getQueryAnalysisUsage(AnalysisUsage &AU) {}
+
+bool runQueryBody(const Module &M, const IRUri &Q, json::Object &Response) {
+    if (!Q.function) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M);
+        Response["error"] = "uri must resolve to a function";
+        return false;
     }
 
     json::Array CallSites;
-    for (const BasicBlock &BB : *Uri.function) {
+    for (const BasicBlock &BB : *Q.function) {
         for (const Instruction &I : BB) {
             const auto *CI = dyn_cast<CallInst>(&I);
             if (!CI) {
@@ -29,7 +22,7 @@ json::Object runCustomQuery(Module &M, const json::Object &Args) {
             }
 
             json::Object Site;
-            Site["uri"] = IRUri::buildURI(&M, Uri.function, &BB, &I);
+            Site["uri"] = IRUri::buildURI(&M, Q.function, &BB, &I);
 
             uint64_t Addr = 0;
             if (findInstrAddr(I, Addr)) {
@@ -40,9 +33,9 @@ json::Object runCustomQuery(Module &M, const json::Object &Args) {
         }
     }
 
-    Doc["found"] = true;
-    Doc["uri"] = IRUri::buildURI(&M, Uri.function);
-    Doc["kind"] = "function";
-    Doc["call_sites"] = std::move(CallSites);
-    return Doc;
+    Response["found"] = true;
+    Response["uri"] = IRUri::buildURI(&M, Q.function);
+    Response["kind"] = "function";
+    Response["call_sites"] = std::move(CallSites);
+    return true;
 }

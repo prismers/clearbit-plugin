@@ -1,59 +1,74 @@
-json::Object runCustomQuery(Module &M, const json::Object &Args) {
-    json::Object Doc;
-    IRUri Uri;
-    std::string ErrorURI, ErrorMsg;
-    if (!resolveIRFromArgs(M, Args, Uri, ErrorURI, ErrorMsg)) {
-        Doc["found"] = false;
-        Doc["uri"] = ErrorURI;
-        Doc["error"] = ErrorMsg;
-        return Doc;
-    }
-    if (!Uri.instruction) {
-        Doc["found"] = false;
-        Doc["uri"] = IRUri::buildURI(&M);
-        Doc["error"] = "uri must resolve to an instruction";
-        return Doc;
+void getQueryAnalysisUsage(AnalysisUsage &AU) {
+    AU.addRequired<AliasAnalysis>();
+    AU.addRequired<MemoryDependenceAnalysis>();
+}
+
+bool runQueryBody(const Module &M, const IRUri &Q, json::Object &Response) {
+    if (!Q.instruction || !Q.block || !Q.function) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M);
+        Response["error"] = "uri must resolve to a load or store instruction";
+        return false;
     }
 
-    json::Array Defs;
-    for (const Use &Op : Uri.instruction->operands()) {
-        const Value *V = Op.get();
-        json::Object Entry;
+    if (!isa<LoadInst>(Q.instruction) && !isa<StoreInst>(Q.instruction)) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+        Response["error"] = "instruction is not a load or store";
+        return false;
+    }
 
-        if (const auto *DefInst = dyn_cast<Instruction>(V)) {
-            const BasicBlock *DefBB = DefInst->getParent();
-            const Function *DefFn = DefBB ? DefBB->getParent() : nullptr;
-
-            Entry["kind"] = "instruction";
-            Entry["uri"] = IRUri::buildURI(&M, DefFn, DefBB, DefInst);
-            Entry["opcode"] = DefInst->getOpcodeName();
-
-            if (DefBB) {
-                std::size_t DefIdx = 0;
-                if (IRUri::buildInstIdx(*DefBB, *DefInst, DefIdx)) {
-                    Entry["index"] = static_cast<int64_t>(DefIdx);
-                }
-            }
-
-            uint64_t Addr = 0;
-            if (findInstrAddr(*DefInst, Addr)) {
-                appendAsmLoc(Entry, Addr);
-            }
-        } else if (const auto *Arg = dyn_cast<Argument>(V)) {
-            Entry["kind"] = "argument";
-            Entry["uri"] = IRUri::buildURI(&M, Uri.function);
-            Entry["name"] = Arg->getName().str();
-        } else {
-            Entry["kind"] = "constant";
-            Entry["uri"] = "";
+    // getDependency requires a non-const Instruction*. Recover it by iterating
+    // the block — comparing against Q.instruction (const Instruction*) is safe
+    // because Instruction* implicitly converts to const Instruction* for ==.
+    Instruction *QueryInst = nullptr;
+    for (Instruction &I : *Q.block) {
+        if (&I == Q.instruction) {
+            QueryInst = &I;
+            break;
         }
-
-        Defs.push_back(std::move(Entry));
+    }
+    if (!QueryInst) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+        Response["error"] = "could not locate instruction in block";
+        return false;
     }
 
-    Doc["found"] = true;
-    Doc["uri"] = IRUri::buildURI(&M, Uri.function, Uri.block, Uri.instruction);
-    Doc["kind"] = "instruction";
-    Doc["definitions"] = std::move(Defs);
-    return Doc;
+    MemoryDependenceAnalysis &MDA =
+        getFunctionAnalysis<MemoryDependenceAnalysis>(*Q.function);
+    MemDepResult Dep = MDA.getDependency(QueryInst);
+
+    json::Object DepObj;
+    if (Dep.isDef()) {
+        DepObj["kind"] = "def";
+    } else if (Dep.isClobber()) {
+        DepObj["kind"] = "clobber";
+    } else if (Dep.isNonLocal()) {
+        DepObj["kind"] = "non_local";
+    } else if (Dep.isNonFuncLocal()) {
+        DepObj["kind"] = "non_func_local";
+    } else {
+        DepObj["kind"] = "unknown";
+    }
+
+    if (Dep.isDef() || Dep.isClobber()) {
+        Instruction *DepI = Dep.getInst();
+        if (DepI) {
+            const BasicBlock *DepBB = DepI->getParent();
+            const Function *DepFn = DepBB ? DepBB->getParent() : nullptr;
+            DepObj["uri"] = IRUri::buildURI(&M, DepFn, DepBB, DepI);
+            DepObj["opcode"] = DepI->getOpcodeName();
+            uint64_t Addr = 0;
+            if (findInstrAddr(*DepI, Addr)) {
+                appendAsmLoc(DepObj, Addr);
+            }
+        }
+    }
+
+    Response["found"] = true;
+    Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+    Response["kind"] = "instruction";
+    Response["dependency"] = std::move(DepObj);
+    return true;
 }

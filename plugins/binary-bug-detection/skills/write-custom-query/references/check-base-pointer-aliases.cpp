@@ -1,65 +1,65 @@
-static const Value *stripGEPsAndCasts(const Value *V) {
-    while (true) {
-        if (const auto *GEP = dyn_cast<GetElementPtrInst>(V)) {
-            V = GEP->getPointerOperand();
-        } else if (const auto *BC = dyn_cast<BitCastInst>(V)) {
-            V = BC->getOperand(0);
-        } else {
-            break;
-        }
-    }
-    return V;
+void getQueryAnalysisUsage(AnalysisUsage &AU) {
+    AU.addRequired<AliasAnalysis>();
 }
 
-json::Object runCustomQuery(Module &M, const json::Object &Args) {
-    json::Object Doc;
-    IRUri Uri;
-    std::string ErrorURI, ErrorMsg;
-    if (!resolveIRFromArgs(M, Args, Uri, ErrorURI, ErrorMsg)) {
-        Doc["found"] = false;
-        Doc["uri"] = ErrorURI;
-        Doc["error"] = ErrorMsg;
-        return Doc;
-    }
-    if (!Uri.instruction) {
-        Doc["found"] = false;
-        Doc["uri"] = IRUri::buildURI(&M);
-        Doc["error"] = "uri must resolve to a load or store instruction";
-        return Doc;
+bool runQueryBody(const Module &M, const IRUri &Q, json::Object &Response) {
+    if (!Q.instruction || !Q.function) {
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M);
+        Response["error"] = "uri must resolve to a load or store instruction";
+        return false;
     }
 
     const Value *TargetPtr = nullptr;
-    if (const auto *LI = dyn_cast<LoadInst>(Uri.instruction)) {
+    if (const auto *LI = dyn_cast<LoadInst>(Q.instruction)) {
         TargetPtr = LI->getPointerOperand();
-    } else if (const auto *SI = dyn_cast<StoreInst>(Uri.instruction)) {
+    } else if (const auto *SI = dyn_cast<StoreInst>(Q.instruction)) {
         TargetPtr = SI->getPointerOperand();
     }
     if (!TargetPtr) {
-        Doc["found"] = false;
-        Doc["uri"] = IRUri::buildURI(&M, Uri.function, Uri.block, Uri.instruction);
-        Doc["error"] = "target instruction is not a load or store";
-        return Doc;
+        Response["found"] = false;
+        Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+        Response["error"] = "target instruction is not a load or store";
+        return false;
     }
 
-    const Value *TargetBase = stripGEPsAndCasts(TargetPtr);
+    AliasAnalysis &AA = getFunctionAnalysis<AliasAnalysis>(*Q.function);
+    AliasAnalysis::Location TargetLoc(TargetPtr, AliasAnalysis::Location::UnknownSize);
 
     json::Array Aliases;
-    for (const BasicBlock &BB : *Uri.function) {
+    for (const BasicBlock &BB : *Q.function) {
         for (const Instruction &I : BB) {
+            if (&I == Q.instruction) {
+                continue;
+            }
+
             const Value *Ptr = nullptr;
             if (const auto *LI = dyn_cast<LoadInst>(&I)) {
                 Ptr = LI->getPointerOperand();
             } else if (const auto *SI = dyn_cast<StoreInst>(&I)) {
                 Ptr = SI->getPointerOperand();
             }
+            if (!Ptr) {
+                continue;
+            }
 
-            if (!Ptr || stripGEPsAndCasts(Ptr) != TargetBase || &I == Uri.instruction) {
+            AliasAnalysis::AliasResult R =
+                AA.alias(TargetLoc, AliasAnalysis::Location(Ptr, AliasAnalysis::Location::UnknownSize));
+            if (R == AliasAnalysis::NoAlias) {
                 continue;
             }
 
             json::Object Entry;
-            Entry["uri"] = IRUri::buildURI(&M, Uri.function, &BB, &I);
+            Entry["uri"] = IRUri::buildURI(&M, Q.function, &BB, &I);
             Entry["opcode"] = I.getOpcodeName();
+
+            if (R == AliasAnalysis::MustAlias) {
+                Entry["alias_result"] = "must";
+            } else if (R == AliasAnalysis::PartialAlias) {
+                Entry["alias_result"] = "partial";
+            } else {
+                Entry["alias_result"] = "may";
+            }
 
             uint64_t Addr = 0;
             if (findInstrAddr(I, Addr)) {
@@ -70,9 +70,9 @@ json::Object runCustomQuery(Module &M, const json::Object &Args) {
         }
     }
 
-    Doc["found"] = true;
-    Doc["uri"] = IRUri::buildURI(&M, Uri.function, Uri.block, Uri.instruction);
-    Doc["kind"] = "instruction";
-    Doc["base_aliases"] = std::move(Aliases);
-    return Doc;
+    Response["found"] = true;
+    Response["uri"] = IRUri::buildURI(&M, Q.function, Q.block, Q.instruction);
+    Response["kind"] = "instruction";
+    Response["aliases"] = std::move(Aliases);
+    return true;
 }
