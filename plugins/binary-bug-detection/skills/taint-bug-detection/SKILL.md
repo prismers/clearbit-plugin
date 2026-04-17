@@ -1,19 +1,20 @@
 ---
-name: binary-bug-detection
+name: taint-bug-detection
 description: >-
-  Detect taint-style vulnerabilities in an ELF binary using ClearBit IR analysis — buffer
-  overflow, command injection, use-after-free, and any taint-reachable sink. Use this skill
-  whenever the user wants to find security bugs or vulnerabilities in a compiled binary, even
-  if they don't say "taint" or "ClearBit". Trigger on: "analyze this binary for bugs", "check
-  if ./httpd is vulnerable", "find CVEs in this ELF", "security audit this binary", "is there
-  a buffer overflow in this program", "pentest this binary", "scan this for vulnerabilities",
-  or just a path to an ELF with a request to check it. Orchestrates Plan, Analyze, and
-  Validate agents to produce confirmed bugs with PoC scripts.
+  Detect taint-style vulnerabilities in a single ELF binary using ClearBit IR analysis —
+  buffer overflow, command injection, use-after-free, and any taint-reachable sink. Use this
+  skill for standalone binaries from desktop software, servers, CTF challenges, or daemons.
+  Trigger on: "analyze this binary for bugs", "check if ./server is vulnerable", "find CVEs
+  in this ELF", "security audit this binary", "is there a buffer overflow in this program",
+  "pentest this binary", "scan this for vulnerabilities", or just a path to an ELF with a
+  request to check it. Orchestrates Plan, Analyze, and Validate agents to produce confirmed
+  bugs with PoC scripts.
 ---
 
-# Binary Bug Detection
+# Taint Bug Detection
 
-Use this skill to find taint-style vulnerabilities in an ELF binary.
+Use this skill to find taint-style vulnerabilities in a **single ELF binary** — desktop
+software, server daemons, CTF binaries, or any standalone compiled program.
 
 
 ## Inputs
@@ -62,3 +63,8 @@ c. Discard reports where `exploitable` is false, then proceed to the next plan.
 ## Output
 
 Report a table of confirmed, exploitable vulnerabilities (plan ID, bug class, source → sink, confidence, PoC trigger). Link each row to `<binary>-validate/<report-id>.json` for full detail. If none found, say so and list dismissed high-confidence reports with reasons.
+
+## Companion Skills
+
+- `iot-bug-detection` — multi-binary cross-process taint analysis for IoT firmware
+- `write-custom-query` — write custom ClearBit IR queries during any analysis stage
