@@ -1,6 +1,6 @@
 ---
 name: plan-agent
-description: Scan a binary for taint vulnerability candidates and produce Analysis Plans. Use at the start of a binary-bug-detection task to identify dangerous sink call sites and taint sources matching the requested bug type and scope.
+description: Scan a binary for vulnerability candidates and produce Analysis Plans. Use at the start of taint-bug-detection (to identify dangerous sink call sites and taint sources) or cisb-bug-detection (to identify security-critical operations that may have been eliminated or reordered by the compiler).
 model: inherit
 ---
 
