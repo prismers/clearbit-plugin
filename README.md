@@ -37,7 +37,16 @@ ClearBit is more effective when used in combination with external plugins that p
 
 ## Available plugin
 
-- `binary-bug-detection`: Detect taint-style vulnerabilities (buffer overflow, command injection) in ELF binaries via ClearBit IR analysis. Includes client setup and multi-agent bug-finding workflow.
+### `binary-bug-detection`
+
+Multi-skill plugin for finding security vulnerabilities in ELF binaries via ClearBit IR analysis. Includes client setup and a multi-agent (Plan → Analyze → Validate) bug-finding workflow.
+
+| Skill | What it finds | When to use |
+|---|---|---|
+| `taint-bug-detection` | Buffer overflows, command injection, use-after-free | Standalone binaries — desktop software, servers, CTF |
+| `iot-bug-detection` | Cross-binary taint chains through IPC bridges (NVRAM, /tmp, sockets) | IoT / router firmware with multiple cooperating processes |
+| `cisb-bug-detection` | Compiler-introduced bugs — dead store elimination of secret scrubs, null/overflow check removal, reordering, uninitialized padding leaks, Spectre gadgets | Any binary where the compiler may have optimized away security-critical code |
+| `write-custom-query` | Custom ClearBit IR queries | Targeted follow-up analysis at any stage |
 
 ## What is ClearBit?
 

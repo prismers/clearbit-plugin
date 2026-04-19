@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "binary-bug-detection",
-      "description": "Detect taint-style vulnerabilities in ELF binaries using ClearBit IR analysis, including setup and multi-agent bug finding",
+      "description": "Find security vulnerabilities in ELF binaries using ClearBit IR analysis. Skills: taint-bug-detection (buffer overflow, command injection, UAF), iot-bug-detection (cross-binary IoT firmware taint), cisb-bug-detection (compiler-introduced security bugs via DSE/UB/reordering), write-custom-query (custom IR queries). Orchestrates Plan, Analyze, and Validate agents.",
       "source": "./plugins/binary-bug-detection",
       "category": "development"
     }
