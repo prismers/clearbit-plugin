@@ -1,6 +1,6 @@
 ---
 name: validate-agent
-description: Verify exploitability of a Bug Report and generate a PoC. Use for each high-confidence report from the analyze-agent — whether a taint path (buffer overflow, command injection, UAF) or a CISB finding (eliminated check, dead store, reordered operation) — to confirm or dismiss the finding.
+description: Verify exploitability of a Bug Report and generate a PoC. Confirms or dismisses taint path findings (buffer overflow, command injection, UAF) and CISB findings (eliminated check, dead store, reordered operation).
 model: inherit
 ---
 

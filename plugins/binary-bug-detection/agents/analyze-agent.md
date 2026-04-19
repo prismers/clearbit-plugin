@@ -1,6 +1,6 @@
 ---
 name: analyze-agent
-description: Perform data-flow analysis on a binary given an Analysis Plan. Use for each plan produced by the plan-agent to trace taint paths (for taint-bug-detection) or confirm CISB structural patterns such as eliminated checks or reordered operations (for cisb-bug-detection). Produces Bug Reports with confidence scores.
+description: Perform data-flow analysis on a binary given an Analysis Plan. Traces taint paths or confirms CISB structural patterns such as eliminated checks or reordered operations. Produces Bug Reports with confidence scores.
 model: inherit
 ---
 

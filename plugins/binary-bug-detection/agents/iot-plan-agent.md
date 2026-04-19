@@ -1,6 +1,6 @@
 ---
 name: iot-plan-agent
-description: Scan a single IoT firmware binary for taint vulnerability candidates, emphasizing IoT-specific sources (nvram_get, CGI env vars, network sockets) and bridge point writers/readers. Produces Analysis Plans and Bridge Point Records for the iot-bug-detection orchestrator.
+description: Scan a single IoT firmware binary for taint vulnerability candidates, emphasizing IoT-specific sources (nvram_get, CGI env vars, network sockets) and bridge point writers/readers. Produces Analysis Plans and Bridge Point Records.
 model: inherit
 ---
 

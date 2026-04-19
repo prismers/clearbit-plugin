@@ -1,6 +1,6 @@
 ---
 name: iot-bridge-agent
-description: Stitch per-binary bridge point records into high-order taint chains by matching IPC writers to readers across binaries, then trace the stitched path to a dangerous sink. Use after all per-binary taint analysis is complete in the iot-bug-detection workflow.
+description: Stitch per-binary bridge point records into high-order taint chains by matching IPC writers to readers across binaries, then trace the stitched path to a dangerous sink.
 model: inherit
 ---
 
