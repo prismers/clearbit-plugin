@@ -62,8 +62,8 @@ Orchestrate agents across all binaries, then stitch results through bridge point
 
 ### Step 1 — Upload all binaries
 
-For each binary in `binaries`, upload to ClearBit (`http://localhost:3664`) and collect `binary_id`.
-Poll each until status is `ready`. Build a map: `{ filename → binary_id }`.
+For each binary in `binaries`, upload to ClearBit (`http://localhost:3664`) with `$CLARBIT_API_KEY` and collect `binary_id`.
+Poll each with `check_binary_status` until status is `ready`. Build a map: `{ filename → binary_id }`.
 
 ### Step 2 — Per-binary taint plans
 
@@ -113,5 +113,4 @@ exploitable sink — these are useful for manual follow-up.
 
 ## Companion Skills
 
-- `taint-bug-detection` — single-binary taint analysis for general-purpose software
 - `write-custom-query` — write custom ClearBit IR queries during any stage

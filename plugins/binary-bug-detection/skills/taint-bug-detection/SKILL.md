@@ -40,8 +40,8 @@ Proceed in depth-first order: fully validate all reports for one plan before mov
 
 ### Step 1 — Upload binary
 
-Upload input `binary` to ClearBit using the upload base URL (`http://localhost:3664`) and obtain `binary_id`.
-Poll until status is `ready` before proceeding.
+Upload input `binary` to ClearBit using the upload base URL (`http://localhost:3664`) with `$CLARBIT_API_KEY` and obtain `binary_id`.
+Poll with `check_binary_status` until status is `ready` before proceeding.
 
 Derive `<binary>` = base filename without directory path (e.g. `httpd`).
 
@@ -66,5 +66,4 @@ Report a table of confirmed, exploitable vulnerabilities (plan ID, bug class, so
 
 ## Companion Skills
 
-- `iot-bug-detection` — multi-binary cross-process taint analysis for IoT firmware
 - `write-custom-query` — write custom ClearBit IR queries during any analysis stage

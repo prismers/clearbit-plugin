@@ -11,6 +11,10 @@ A Claude Code plugin that finds security vulnerabilities in ELF binaries using C
 | `cisb-bug-detection` | Compiler-introduced bugs — dead store elimination of secret scrubs, null/overflow check removal, reordering, uninitialized padding leaks, Spectre gadgets | Any binary where the compiler may have optimized away security-critical code |
 | `write-custom-query` | Custom ClearBit IR queries | Targeted follow-up analysis at any stage |
 
+### Skill Dependencies
+
+`taint-bug-detection`, `iot-bug-detection`, and `cisb-bug-detection` each depend on `write-custom-query`. The three bug-detection skills are independent of one another.
+
 ## Agents
 
 | Agent | Role |

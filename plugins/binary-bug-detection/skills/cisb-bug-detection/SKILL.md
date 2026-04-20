@@ -61,7 +61,7 @@ Key IR signatures to look for:
 
 ### Step 1 — Upload binary
 
-Upload `binary` to ClearBit (`http://localhost:3664`) and obtain `binary_id`. Poll until
+Upload `binary` to ClearBit (`http://localhost:3664`) with `$CLARBIT_API_KEY` and obtain `binary_id`. Poll with `check_binary_status` until
 status is `ready`. Derive `<binary>` = base filename (e.g. `httpd`).
 
 ### Step 2 — Generate CISB plans
@@ -107,6 +107,4 @@ reasons (e.g., "check eliminated but path unreachable in practice").
 
 ## Companion Skills
 
-- `taint-bug-detection` — classic taint-style vulnerabilities (buffer overflow, command injection, UAF)
-- `iot-bug-detection` — cross-binary taint analysis for IoT firmware
 - `write-custom-query` — write custom ClearBit IR queries for any CISB investigation
