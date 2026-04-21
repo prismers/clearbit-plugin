@@ -14,6 +14,19 @@ Plugin marketplace for the ClearBit binary analysis service.
 /plugin install binary-bug-detection@clearbit-plugins
 ```
 
+## Install into Codex or Gemini
+
+From this repo checkout:
+
+```bash
+./install.sh codex
+./install.sh gemini
+```
+
+The installer symlinks skills and agents from every plugin under `plugins/`
+into the selected client's user-wide config and registers each plugin's MCP
+servers with the client's `mcp add` command.
+
 ## Config the plugin
 
 Run the following commands to configure:
